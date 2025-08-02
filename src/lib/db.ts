@@ -1,3 +1,4 @@
+// db.ts or dbConfig.ts
 import mysql from 'mysql2/promise'
 
 export const dbConfig = {
@@ -7,8 +8,6 @@ export const dbConfig = {
   database: process.env.MYSQLDATABASE!,
   port: Number(process.env.MYSQLPORT || 3306),
 }
-
-
 
 export const getConnection = async () => {
   return await mysql.createConnection(dbConfig)
