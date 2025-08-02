@@ -1,11 +1,11 @@
 import mysql from 'mysql2/promise'
 
 export const dbConfig = {
-  host: 'mysql.railway.internal',
-  user: 'root',
-  password: 'tAxxpQABIDiTSEQOYRDahSykTqXFdyOH',
-  database: 'railway',
-  port: 3306,
+  host: process.env.MYSQLHOST!,
+  user: process.env.MYSQLUSER!,
+  password: process.env.MYSQLPASSWORD!,
+  database: process.env.MYSQLDATABASE!,
+  port: Number(process.env.MYSQLPORT || 3306),
 }
 
 
