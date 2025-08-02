@@ -1,45 +1,39 @@
-import { NextResponse } from 'next/server'
-import mysql from 'mysql2/promise'
-import bcrypt from 'bcrypt'
-
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '', // add if you have one
-  database: 'fintrack',
-}
+import { NextResponse } from "next/server";
+import { getConnection } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
+  let connection;
   try {
-    const { name, email, password } = await req.json()
+    const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
+    connection = await getConnection();
 
-    const connection = await mysql.createConnection(dbConfig)
-
-    const [existing] = await connection.execute(
-      'SELECT * FROM users WHERE email = ?',
+    // Check if user exists
+    const [existing] = await connection.execute<any[]>(
+      "SELECT * FROM users WHERE email = ?",
       [email]
-    )
-
-    if ((existing as any[]).length > 0) {
-      await connection.end()
-      return NextResponse.json({ error: 'User already exists' }, { status: 409 })
+    );
+    if (existing.length > 0) {
+      return NextResponse.json({ error: "User already exists" }, { status: 409 });
     }
 
+    // Insert user
     await connection.execute(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+      "INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
       [name, email, hashedPassword]
-    )
+    );
 
-    await connection.end()
-    return NextResponse.json({ message: 'User registered successfully' }, { status: 201 })
+    return NextResponse.json({ message: "User registered successfully" }, { status: 201 });
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error("Register error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  } finally {
+    if (connection) await connection.end();
   }
 }

@@ -1,14 +1,11 @@
-// db.ts or dbConfig.ts
-import mysql from 'mysql2/promise'
+import mysql from "mysql2/promise";
 
-export const dbConfig = {
-  host: process.env.MYSQLHOST!,
-  user: process.env.MYSQLUSER!,
-  password: process.env.MYSQLPASSWORD!,
-  database: process.env.MYSQLDATABASE!,
-  port: Number(process.env.MYSQLPORT || 3306),
-}
-
-export const getConnection = async () => {
-  return await mysql.createConnection(dbConfig)
+export async function getConnection() {
+  return await mysql.createConnection({
+    host: process.env.MYSQLHOST,
+    port: Number(process.env.MYSQLPORT),
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+  });
 }
